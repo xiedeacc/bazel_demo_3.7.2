@@ -68,56 +68,56 @@ alias(
     visibility = ["//visibility:public"],
 )
 
-#alias(
-#name = "openssl",
-#actual = select({
-#":msvc": "openssl_msvc",
-#":clang": "openssl_default",
-#"//conditions:default": "openssl_default",
-#}),
-#visibility = ["//visibility:public"],
-#)
-
 alias(
     name = "openssl",
-    actual = "openssl_default",
+    actual = select({
+        ":msvc": "openssl_msvc",
+        ":clang": "openssl_default",
+        "//conditions:default": "openssl_default",
+    }),
     visibility = ["//visibility:public"],
 )
 
-#configure_make_variant(
-#name = "openssl_msvc",
-#build_data = [
-#"@nasm//:nasm",
-#"@perl//:perl",
-#],
-#configure_command = "Configure",
-#configure_in_place = True,
-#configure_options = CONFIGURE_OPTIONS + [
-#"VC-WIN64A",
-#"ASFLAGS=\" \"",
-#],
-#configure_prefix = "$$PERL",
-#env = {
-#"CFLAGS": "-Zi",
-#"PATH": "$$(dirname $(execpath @nasm//:nasm)):$$PATH",
-#"PERL": "$(execpath @perl//:perl)",
-#},
-#lib_name = LIB_NAME,
-#lib_source = ":all_srcs",
-#out_static_libs = [
-#"libssl.lib",
-#"libcrypto.lib",
-#],
-#targets = MAKE_TARGETS,
-#toolchain = "@rules_foreign_cc//toolchains:preinstalled_nmake_toolchain",
-#deps = [
-#"@brotli//:brotlicommon",
-#"@brotli//:brotlidec",
-#"@brotli//:brotlienc",
-#"@zlib",
-#"@zstd",
-#],
+#alias(
+#name = "openssl",
+#actual = "openssl_default",
+#visibility = ["//visibility:public"],
 #)
+
+configure_make_variant(
+    name = "openssl_msvc",
+    build_data = [
+        "@nasm//:nasm",
+        "@perl//:perl",
+    ],
+    configure_command = "Configure",
+    configure_in_place = True,
+    configure_options = CONFIGURE_OPTIONS + [
+        "VC-WIN64A",
+        "ASFLAGS=\" \"",
+    ],
+    configure_prefix = "$$PERL",
+    env = {
+        "CFLAGS": "-Zi",
+        "PATH": "$$(dirname $(execpath @nasm//:nasm)):$$PATH",
+        "PERL": "$(execpath @perl//:perl)",
+    },
+    lib_name = LIB_NAME,
+    lib_source = ":all_srcs",
+    out_static_libs = [
+        "libssl.lib",
+        "libcrypto.lib",
+    ],
+    targets = MAKE_TARGETS,
+    toolchain = "@rules_foreign_cc//toolchains:preinstalled_nmake_toolchain",
+    deps = [
+        "@brotli//:brotlicommon",
+        "@brotli//:brotlidec",
+        "@brotli//:brotlienc",
+        "@zlib",
+        "@zstd",
+    ],
+)
 
 configure_make(
     name = "openssl_default",

@@ -1,7 +1,4 @@
-# NEW
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
-
-# NEW
 load(
     "@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
     "feature",
@@ -11,7 +8,6 @@ load(
 )
 
 all_link_actions = [
-    # NEW
     ACTION_NAMES.cpp_link_executable,
     ACTION_NAMES.cpp_link_dynamic_library,
     ACTION_NAMES.cpp_link_nodeps_dynamic_library,
@@ -21,44 +17,43 @@ def _impl(ctx):
     tool_paths = [
         tool_path(
             name = "gcc",
-            path = "/usr/bin/clang",
+            path = "/usr/local/llvm-18/bin/clang",
         ),
         tool_path(
             name = "g++",
-            path = "/usr/bin/clang++",
+            path = "/usr/local/llvm-18/bin/clang++",
         ),
         tool_path(
             name = "ld",
-            path = "/usr/bin/ld",
+            path = "/usr/local/llvm-18/bin/lld",
         ),
         tool_path(
             name = "ar",
-            path = "/usr/bin/ar",
+            path = "/usr/local/llvm-18/bin/llvm-ar",
         ),
         tool_path(
             name = "cpp",
-            path = "/usr/bin/clang++",
+            path = "/usr/local/llvm-18/bin/clang++",
         ),
         tool_path(
             name = "gcov",
-            path = "/usr/bin/gcov",
+            path = "/usr/local/llvm-18/bin/llvm-cov",
         ),
         tool_path(
             name = "nm",
-            path = "/usr/bin/nm",
+            path = "/usr/local/llvm-18/bin/llvm-nm",
         ),
         tool_path(
             name = "objdump",
-            path = "/usr/bin/objdump",
+            path = "/usr/local/llvm-18/bin/llvm-objdump",
         ),
         tool_path(
             name = "strip",
-            path = "/usr/bin/strip",
+            path = "/usr/local/llvm-18/bin/llvm-strip",
         ),
     ]
 
     features = [
-        # NEW
         feature(
             name = "default_linker_flags",
             enabled = True,
@@ -68,9 +63,47 @@ def _impl(ctx):
                     flag_groups = ([
                         flag_group(
                             flags = [
-                                "-lstdc++",
                                 "-lpthread",
                                 "-lm",
+                                "-lc++",
+                                "-lc++abi",
+                            ],
+                        ),
+                    ]),
+                ),
+            ],
+        ),
+        feature(
+            name = "default_compile_flags",
+            enabled = True,
+            flag_sets = [
+                flag_set(
+                    actions = [
+                        ACTION_NAMES.c_compile,
+                        ACTION_NAMES.cpp_compile,
+                    ],
+                    flag_groups = ([
+                        flag_group(
+                            flags = [
+                                "-U_FORTIFY_SOURCE",
+                            ],
+                        ),
+                    ]),
+                ),
+            ],
+        ),
+        feature(
+            name = "default_cc_compile_flags",
+            enabled = True,
+            flag_sets = [
+                flag_set(
+                    actions = [
+                        ACTION_NAMES.cpp_compile,
+                    ],
+                    flag_groups = ([
+                        flag_group(
+                            flags = [
+                                "-stdlib=libc++",
                             ],
                         ),
                     ]),
@@ -83,8 +116,11 @@ def _impl(ctx):
         ctx = ctx,
         features = features,  # NEW
         cxx_builtin_include_directories = [
-            "/usr/lib/llvm-14/lib/clang/14.0.0/include",
-            #"/usr/lib/clang/14.0.0/include",
+            "/usr/local/llvm-18/include/x86_64-unknown-linux-gnu/c++/v1",
+            "/usr/local/llvm-18/include/c++/v1",
+            "/usr/local/llvm-18/lib/clang/18/include",
+            "/usr/local/include",
+            "/usr/include/x86_64-linux-gnu",
             "/usr/include",
         ],
         toolchain_identifier = "local",
